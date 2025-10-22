@@ -1,0 +1,33 @@
+name: Auto Version CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  versioning:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar o repositório
+        uses: actions/checkout@v3
+
+      - name: Ler e incrementar versão
+        run: |
+          VERSION=$(cat version.txt)
+          echo "Versão atual: $VERSION"
+          BASE=${VERSION%.*}
+          LAST=${VERSION##*.}
+          NEXT=$((LAST + 1))
+          NEW_VERSION="${BASE}.${NEXT}"
+          echo "Nova versão: $NEW_VERSION"
+          echo $NEW_VERSION > version.txt
+
+      - name: Commitar nova versão
+        run: |
+          git config user.name "CiroNandes-Automatico"
+          git config user.email "ciro.nandes@gmail.com"
+          git add version.txt
+          git commit -m "Incremento automático para $NEW_VERSION"
+          git push origin main
